@@ -325,7 +325,21 @@
 <script>
   // ─── KONFIGURATION ──────────────────────────────────────────────
   const WEBHOOK_URL = "https://hook.eu1.make.com/op8s2x8a6wtjkwog8fx8gd8e6xgvkq83";
+  const PASSWORT = "4113";
   // ────────────────────────────────────────────────────────────────
+
+  // Passwort-Schutz
+  (function() {
+    const gespeichert = sessionStorage.getItem("empire_auth");
+    if (gespeichert !== PASSWORT) {
+      const eingabe = prompt("Bitte Passwort eingeben:");
+      if (eingabe !== PASSWORT) {
+        document.body.innerHTML = "<div style='display:flex;align-items:center;justify-content:center;height:100vh;color:#e05555;font-family:sans-serif;font-size:18px;'>Zugriff verweigert.</div>";
+        return;
+      }
+      sessionStorage.setItem("empire_auth", PASSWORT);
+    }
+  })();
 
   // Foto-Vorschau
   document.getElementById("foto").addEventListener("change", function(e) {
