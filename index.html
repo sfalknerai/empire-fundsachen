@@ -367,7 +367,7 @@
     msgError.style.display = "none";
 
     btn.disabled = true;
-    btn.textContent = "Speichern...";
+    btn.textContent = "Wird gespeichert...";
     msgLoading.style.display = "block";
 
     try {
@@ -378,12 +378,11 @@
         body: formData
       });
 
-      const result = await response.json();
+      const text = await response.text();
 
       msgLoading.style.display = "none";
 
-      if (response.ok && result.status === "ok") {
-        document.getElementById("msgId").textContent = result.id || "";
+      if (response.ok) {
         msgSuccess.style.display = "block";
         // Formular zurücksetzen
         this.reset();
@@ -391,15 +390,24 @@
         document.getElementById("fotoUploadArea").querySelector("p").textContent = "Foto aufnehmen oder aus Galerie wählen";
       } else {
         msgError.style.display = "block";
+        btn.disabled = false;
+        btn.textContent = "Fundsache speichern";
       }
     } catch (err) {
       msgLoading.style.display = "none";
       msgError.style.display = "block";
       console.error("Fehler:", err);
+      btn.disabled = false;
+      btn.textContent = "Fundsache speichern";
     }
+  });
 
+  // Nochmal erfassen Button nach Erfolg
+  document.getElementById("fundsachenForm").addEventListener("reset", function() {
+    const btn = document.getElementById("submitBtn");
     btn.disabled = false;
     btn.textContent = "Fundsache speichern";
+    document.getElementById("msgSuccess").style.display = "none";
   });
 </script>
 
