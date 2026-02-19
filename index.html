@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Empire — Fundsache erfassen</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 32px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .logo p {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    label .required {
+      color: #e05555;
+      margin-left: 2px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 15px;
+      color: #e0e0e0;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #555;
+    }
+
+    select option {
+      background: #111;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .foto-upload {
+      border: 2px dashed #2a2a2a;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+
+    .foto-upload:hover {
+      border-color: #444;
+      background: #111;
+    }
+
+    .foto-upload input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .foto-upload .upload-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .foto-upload p {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .foto-preview {
+      display: none;
+      margin-top: 12px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .foto-preview img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-submit:hover {
+      background: #ddd;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.99);
+    }
+
+    .btn-submit:disabled {
+      background: #333;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    /* Status Messages */
+    .message {
+      display: none;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .message.success {
+      background: #0d2e0d;
+      border: 1px solid #1a5c1a;
+      color: #4caf50;
+    }
+
+    .message.error {
+      background: #2e0d0d;
+      border: 1px solid #5c1a1a;
+      color: #e05555;
+    }
+
+    .message.loading {
+      background: #1a1a2e;
+      border: 1px solid #2a2a5c;
+      color: #7070e0;
+    }
+
+    .id-badge {
+      display: inline-block;
+      background: #1a3a1a;
+      border: 1px solid #2a5c2a;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: monospace;
+      font-size: 16px;
+      color: #4caf50;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">
+    <h1>Empire</h1>
+    <p>Fundsache erfassen</p>
+  </div>
+
+  <form id="fundsachenForm">
+
+    <!-- Foto Upload -->
+    <div class="form-group">
+      <label>Foto <span class="required">*</span></label>
+      <div class="foto-upload" id="fotoUploadArea">
+        <input type="file" id="foto" name="foto" accept="image/*" capture="environment" required>
+        <div class="upload-icon">📷</div>
+        <p>Foto aufnehmen oder aus Galerie wählen</p>
+      </div>
+      <div class="foto-preview" id="fotoPreview">
+        <img id="fotoPreviewImg" src="" alt="Vorschau">
+      </div>
+    </div>
+
+    <!-- Kategorie -->
+    <div class="form-group">
+      <label for="kategorie">Kategorie <span class="required">*</span></label>
+      <select id="kategorie" name="kategorie" required>
+        <option value="" disabled selected>Bitte wählen...</option>
+        <option>Schlüssel</option>
+        <option>Handy / Smartphone</option>
+        <option>Geldbörse / Portemonnaie</option>
+        <option>Tasche / Rucksack</option>
+        <option>Ausweis / Dokumente</option>
+        <option>Schmuck</option>
+        <option>Kleidung / Jacke</option>
+        <option>Kopfhörer / AirPods</option>
+        <option>Sonstiges</option>
+      </select>
+    </div>
+
+    <!-- Farbe + Funddatum -->
+    <div class="row">
+      <div class="form-group">
+        <label for="farbe">Farbe <span class="required">*</span></label>
+        <input type="text" id="farbe" name="farbe" placeholder="z.B. Schwarz" required>
+      </div>
+      <div class="form-group">
+        <label for="uhrzeit">Funddatum <span class="required">*</span></label>
+        <input type="date" id="uhrzeit" name="uhrzeit" required>
+      </div>
+    </div>
+
+    <!-- Beschreibung -->
+    <div class="form-group">
+      <label for="beschreibung">Beschreibung <span class="required">*</span></label>
+      <textarea id="beschreibung" name="beschreibung" placeholder="Kurze Beschreibung des Gegenstands..." required></textarea>
+    </div>
+
+    <!-- Merkmale -->
+    <div class="form-group">
+      <label for="merkmale">Besondere Merkmale</label>
+      <input type="text" id="merkmale" name="merkmale" placeholder="Anhänger, Aufkleber, Gravur, etc.">
+    </div>
+
+    <!-- Fundort -->
+    <div class="form-group">
+      <label for="fundort">Fundort <span class="required">*</span></label>
+      <select id="fundort" name="fundort" required>
+        <option value="" disabled selected>Bitte wählen...</option>
+        <option>Dancefloor</option>
+        <option>Bar Erdgeschoss</option>
+        <option>Bar Obergeschoss</option>
+        <option>Eingang / Kasse</option>
+        <option>Garderobe</option>
+        <option>WC</option>
+        <option>VIP Bereich</option>
+        <option>Außenbereich / Raucherbereich</option>
+        <option>Sonstiger Bereich</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn-submit" id="submitBtn">Fundsache speichern</button>
+
+    <div class="message loading" id="msgLoading">Wird gespeichert...</div>
+    <div class="message success" id="msgSuccess">
+      <div>✓ Fundsache erfasst!</div>
+      <div class="id-badge" id="msgId"></div>
+      <div style="margin-top: 8px; color: #888; font-size: 12px;">Der Gegenstand ist jetzt in der Datenbank.</div>
+    </div>
+    <div class="message error" id="msgError">Fehler beim Speichern. Bitte nochmal versuchen.</div>
+
+  </form>
+</div>
+
+<script>
+  // ─── KONFIGURATION ──────────────────────────────────────────────
+  const WEBHOOK_URL = "https://hook.eu1.make.com/op8s2x8a6wtjkwog8fx8gd8e6xgvkq83";
+  // ────────────────────────────────────────────────────────────────
+
+  // Foto-Vorschau
+  document.getElementById("foto").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      document.getElementById("fotoPreviewImg").src = ev.target.result;
+      document.getElementById("fotoPreview").style.display = "block";
+      document.getElementById("fotoUploadArea").querySelector("p").textContent = file.name;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Formular absenden
+  document.getElementById("fundsachenForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById("submitBtn");
+    const msgLoading = document.getElementById("msgLoading");
+    const msgSuccess = document.getElementById("msgSuccess");
+    const msgError = document.getElementById("msgError");
+
+    // Alle Messages zurücksetzen
+    msgLoading.style.display = "none";
+    msgSuccess.style.display = "none";
+    msgError.style.display = "none";
+
+    btn.disabled = true;
+    btn.textContent = "Speichern...";
+    msgLoading.style.display = "block";
+
+    try {
+      const formData = new FormData(this);
+
+      const response = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        body: formData
+      });
+
+      const result = await response.json();
+
+      msgLoading.style.display = "none";
+
+      if (response.ok && result.status === "ok") {
+        document.getElementById("msgId").textContent = result.id || "";
+        msgSuccess.style.display = "block";
+        // Formular zurücksetzen
+        this.reset();
+        document.getElementById("fotoPreview").style.display = "none";
+        document.getElementById("fotoUploadArea").querySelector("p").textContent = "Foto aufnehmen oder aus Galerie wählen";
+      } else {
+        msgError.style.display = "block";
+      }
+    } catch (err) {
+      msgLoading.style.display = "none";
+      msgError.style.display = "block";
+      console.error("Fehler:", err);
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Fundsache speichern";
+  });
+</script>
+
+</body>
+</html>
